@@ -1,17 +1,26 @@
-// Prisma client with Neon adapter for Prisma 7
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { Pool } from "@neondatabase/serverless";
+// src/lib/prisma.ts
+import { PrismaClient } from '@prisma/client';
+import { PrismaNeonHTTP } from '@prisma/adapter-neon';
+import { Pool } from '@neondatabase/serverless';
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const connectionString = process.env.DATABASE_URL;
 
-export const prisma =
-    globalForPrisma.prisma ||
-    new PrismaClient({
-        adapter: process.env.DATABASE_URL
-            ? new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL }))
-            : undefined,
-        log: process.env.NODE_ENV === "development" ? ["query"] : [],
-    });
+const prismaGlobal = global as typeof global & {
+    prisma?: PrismaClient;
+};
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (!prismaGlobal.prisma) {
+    let prisma: PrismaClient;
+
+    if (connectionString) {
+        const pool = new Pool({ connectionString });
+        const adapter = new PrismaNeonHTTP(pool);
+        prisma = new PrismaClient({ adapter });
+    } else {
+        prisma = new PrismaClient();
+    }
+
+    prismaGlobal.prisma = prisma;
+}
+
+export const prisma = prismaGlobal.prisma;
