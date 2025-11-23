@@ -4,41 +4,30 @@ import { PrismaNeon } from '@prisma/adapter-neon';
 import { Pool, neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 
-// Required for Vercel/Next.js Edge runtime
+// Required for Vercel Edge runtime
 neonConfig.webSocketConstructor = ws;
 
-const globalForPrisma = globalThis as unknown as {
-    prisma: PrismaClient | undefined;
-};
-
-const connectionString = process.env.DATABASE_URL;
-console.log("Prisma Init - DATABASE_URL defined:", !!connectionString);
-console.log("Prisma Init - DATABASE_URL type:", typeof connectionString);
-if (connectionString) console.log("Prisma Init - DATABASE_URL length:", connectionString.length);
-
-let prismaInstance: PrismaClient;
-
-if (globalForPrisma.prisma) {
-    prismaInstance = globalForPrisma.prisma;
-} else {
-    if (connectionString) {
-        try {
-            console.log("Initializing Neon adapter...");
-            const pool = new Pool({ connectionString });
-            // Cast pool to any to avoid version mismatch type error
-            const adapter = new PrismaNeon(pool as any);
-            prismaInstance = new PrismaClient({ adapter });
-            console.log("Neon adapter initialized successfully.");
-        } catch (error) {
-            console.error("Failed to initialize Neon adapter, falling back to default PrismaClient:", error);
-            prismaInstance = new PrismaClient();
-        }
-    } else {
-        console.warn("DATABASE_URL not found, using default PrismaClient.");
-        prismaInstance = new PrismaClient();
-    }
+// Global singleton – works in dev and production
+declare global {
+    // eslint-disable-next-line no-var
+    var prisma: PrismaClient | undefined;
 }
 
-export const prisma = prismaInstance;
+const connectionString = process.env.DATABASE_URL;
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// Allow build to succeed without DATABASE_URL, but fail at runtime if missing
+let prismaClient: PrismaClient;
+
+if (!connectionString) {
+    console.warn('DATABASE_URL is missing! Prisma will fail at runtime.');
+    // Create a dummy client for build purposes
+    prismaClient = new PrismaClient();
+} else {
+    prismaClient = new PrismaClient({
+        adapter: new PrismaNeon(new Pool({ connectionString }) as any),
+    });
+}
+
+export const prisma = global.prisma ?? prismaClient;
+
+if (process.env.NODE_ENV !== 'production') global.prisma = prisma;
