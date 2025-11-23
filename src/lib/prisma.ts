@@ -1,8 +1,7 @@
 // src/lib/prisma.ts
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
-import { Pool } from '@neondatabase/serverless';
-import { neonConfig } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import ws from 'ws';
 
 // Required for Vercel/Next.js Edge runtime
@@ -12,14 +11,23 @@ const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-    globalForPrisma.prisma ??
-    new PrismaClient(
-        process.env.DATABASE_URL
-            ? {
-                adapter: new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL })),
-            }
-            : {}
-    );
+const connectionString = process.env.DATABASE_URL;
+
+let prismaInstance: PrismaClient;
+
+if (globalForPrisma.prisma) {
+    prismaInstance = globalForPrisma.prisma;
+} else {
+    if (connectionString) {
+        const pool = new Pool({ connectionString });
+        // Cast pool to any to avoid version mismatch type error
+        const adapter = new PrismaNeon(pool as any);
+        prismaInstance = new PrismaClient({ adapter });
+    } else {
+        prismaInstance = new PrismaClient();
+    }
+}
+
+export const prisma = prismaInstance;
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
