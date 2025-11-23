@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getShipments, createShipment } from '@/lib/db';
 
 export async function GET() {
-    const shipments = await db.shipment.findMany({
-        orderBy: { createdAt: 'desc' },
-    });
+    const shipments = await getShipments();
     return NextResponse.json(shipments);
 }
 
@@ -13,7 +11,7 @@ export async function POST(request: Request) {
     const { trackingCode, sender, recipient, description, weight, from, to, status, location, estimatedDelivery } = body;
 
     // Validate status
-    const validStatuses = ["Picked Up", "In Transit", "Out For Delivery", "Delivered"];
+    const validStatuses = ["Picked Up", "In Transit", "Out For Delivery", "Delivered", "On Hold"];
     if (!validStatuses.includes(status)) {
         return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
     }
@@ -25,23 +23,21 @@ export async function POST(request: Request) {
     }
 
     try {
-        const shipment = await db.shipment.create({
-            data: {
-                trackingCode,
-                sender,
-                recipient,
-                description,
-                weight: weightNum,
-                from,
-                to,
-                status,
-                location,
-                estimatedDelivery: new Date(estimatedDelivery),
-            },
+        const shipment = await createShipment({
+            trackingCode,
+            sender,
+            recipient,
+            description,
+            weight: weightNum,
+            from,
+            to,
+            status,
+            location,
+            estimatedDelivery,
         });
-        return NextResponse.json(shipment);
+        return NextResponse.json(shipment, { status: 201 });
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Error creating shipment' }, { status: 500 });
+        console.error('Error creating shipment:', error);
+        return NextResponse.json({ error: 'Failed to create shipment' }, { status: 500 });
     }
 }

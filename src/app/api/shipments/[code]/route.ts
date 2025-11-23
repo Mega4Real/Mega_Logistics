@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getShipmentByCode, updateShipment, deleteShipment } from '@/lib/db';
 
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;
-    const shipment = await db.shipment.findUnique({
-        where: { trackingCode: code },
-    });
+    const shipment = await getShipmentByCode(code);
 
     if (!shipment) {
         return NextResponse.json({ error: 'Shipment not found' }, { status: 404 });
@@ -38,29 +36,26 @@ export async function PUT(
 
     try {
         const updateData: any = {};
-        if (sender) updateData.sender = sender;
-        if (recipient) updateData.recipient = recipient;
-        if (description) updateData.description = description;
+        if (sender !== undefined) updateData.sender = sender;
+        if (recipient !== undefined) updateData.recipient = recipient;
+        if (description !== undefined) updateData.description = description;
         if (weight !== undefined) updateData.weight = parseFloat(weight);
-        if (from) updateData.from = from;
-        if (to) updateData.to = to;
-        if (status) updateData.status = status;
-        if (location) updateData.location = location;
-        if (estimatedDelivery) updateData.estimatedDelivery = new Date(estimatedDelivery);
+        if (from !== undefined) updateData.from = from;
+        if (to !== undefined) updateData.to = to;
+        if (status !== undefined) updateData.status = status;
+        if (location !== undefined) updateData.location = location;
+        if (estimatedDelivery !== undefined) updateData.estimatedDelivery = estimatedDelivery;
 
-        console.log('PUT /api/shipments/[code] - Tracking code:', code);
-        console.log('PUT /api/shipments/[code] - Update data:', updateData);
+        const shipment = await updateShipment(code, updateData);
 
-        const shipment = await db.shipment.update({
-            where: { trackingCode: code },
-            data: updateData,
-        });
+        if (!shipment) {
+            return NextResponse.json({ error: 'Shipment not found' }, { status: 404 });
+        }
 
-        console.log('PUT /api/shipments/[code] - Updated shipment:', shipment);
         return NextResponse.json(shipment);
     } catch (error) {
-        console.error('PUT /api/shipments/[code] - Error:', error);
-        return NextResponse.json({ error: 'Error updating shipment' }, { status: 500 });
+        console.error('Error updating shipment:', error);
+        return NextResponse.json({ error: 'Failed to update shipment' }, { status: 500 });
     }
 }
 
@@ -71,12 +66,15 @@ export async function DELETE(
     const { code } = await params;
 
     try {
-        const shipment = await db.shipment.delete({
-            where: { trackingCode: code },
-        });
-        return NextResponse.json(shipment);
+        const success = await deleteShipment(code);
+
+        if (!success) {
+            return NextResponse.json({ error: 'Shipment not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: 'Shipment deleted successfully' });
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Error deleting shipment' }, { status: 404 });
+        console.error('Error deleting shipment:', error);
+        return NextResponse.json({ error: 'Failed to delete shipment' }, { status: 500 });
     }
 }
