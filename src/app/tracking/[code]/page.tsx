@@ -3,14 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { db } from "@/lib/db"
+import { getShipmentByCode } from "@/lib/db"
 import { ShipmentStatusTracker } from "@/components/shipment-status-tracker"
 
 export default async function TrackingPage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = await params
-    const shipment = await db.shipment.findUnique({
-        where: { trackingCode: code },
-    })
+    const shipment = await getShipmentByCode(code)
 
     if (!shipment) {
         return (

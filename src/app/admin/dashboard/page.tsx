@@ -1,4 +1,4 @@
-import { db } from "@/lib/db"
+import { getShipments } from "@/lib/db"
 import { AddShipmentForm } from "@/components/add-shipment-form"
 import { ShipmentList } from "@/components/shipment-list"
 import { cookies } from "next/headers"
@@ -14,9 +14,7 @@ export default async function DashboardPage() {
         redirect("/admin/login")
     }
 
-    const shipments = await db.shipment.findMany({
-        orderBy: { createdAt: 'desc' },
-    })
+    const shipments = await getShipments()
 
     return (
         <div className="container mx-auto p-4 space-y-8">
