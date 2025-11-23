@@ -13,14 +13,36 @@ export interface Shipment {
     to: string;
     status: ShipmentStatus;
     location: string;
-    if(!shipment) return null;
-return {
-    ...shipment,
-    status: shipment.status as ShipmentStatus,
-    estimatedDelivery: shipment.estimatedDelivery.toISOString(),
-    createdAt: shipment.createdAt.toISOString(),
-    updatedAt: shipment.updatedAt.toISOString(),
-};
+    estimatedDelivery: string; // ISO string for frontend compatibility
+    createdAt: string;
+    updatedAt: string;
+}
+
+export async function getShipments(): Promise<Shipment[]> {
+    const shipments = await prisma.shipment.findMany({
+        orderBy: { updatedAt: "desc" },
+    });
+    return shipments.map((s: any) => ({
+        ...s,
+        status: s.status as ShipmentStatus,
+        estimatedDelivery: s.estimatedDelivery.toISOString(),
+        createdAt: s.createdAt.toISOString(),
+        updatedAt: s.updatedAt.toISOString(),
+    }));
+}
+
+export async function getShipmentByCode(code: string): Promise<Shipment | null> {
+    const shipment = await prisma.shipment.findUnique({
+        where: { trackingCode: code },
+    });
+    if (!shipment) return null;
+    return {
+        ...shipment,
+        status: shipment.status as ShipmentStatus,
+        estimatedDelivery: shipment.estimatedDelivery.toISOString(),
+        createdAt: shipment.createdAt.toISOString(),
+        updatedAt: shipment.updatedAt.toISOString(),
+    };
 }
 
 export async function createShipment(
