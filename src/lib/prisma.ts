@@ -5,12 +5,12 @@ import { Pool } from "@neondatabase/serverless";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-const connectionString = process.env.DATABASE_URL;
-
 export const prisma =
     globalForPrisma.prisma ||
     new PrismaClient({
-        adapter: connectionString ? new PrismaNeon(new Pool(connectionString)) : undefined,
+        adapter: process.env.DATABASE_URL
+            ? new PrismaNeon(new Pool({ connectionString: process.env.DATABASE_URL }))
+            : undefined,
         log: process.env.NODE_ENV === "development" ? ["query"] : [],
     });
 
