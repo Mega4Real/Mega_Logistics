@@ -1,7 +1,7 @@
 "use client";
 
 import { Package, Truck, MapPin, CheckCircle2 } from "lucide-react";
-import { ShipmentStatus } from "@/lib/db";
+import type { ShipmentStatus } from "@/lib/db";
 
 interface ShipmentStatusTrackerProps {
     currentStatus: ShipmentStatus;

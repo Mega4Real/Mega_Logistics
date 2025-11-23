@@ -19,30 +19,40 @@ export interface Shipment {
 }
 
 export async function getShipments(): Promise<Shipment[]> {
-    const shipments = await prisma.shipment.findMany({
-        orderBy: { updatedAt: "desc" },
-    });
-    return shipments.map((s: any) => ({
-        ...s,
-        status: s.status as ShipmentStatus,
-        estimatedDelivery: s.estimatedDelivery.toISOString(),
-        createdAt: s.createdAt.toISOString(),
-        updatedAt: s.updatedAt.toISOString(),
-    }));
+    try {
+        const shipments = await prisma.shipment.findMany({
+            orderBy: { updatedAt: "desc" },
+        });
+        return shipments.map((s: any) => ({
+            ...s,
+            status: s.status as ShipmentStatus,
+            estimatedDelivery: s.estimatedDelivery.toISOString(),
+            createdAt: s.createdAt.toISOString(),
+            updatedAt: s.updatedAt.toISOString(),
+        }));
+    } catch (error) {
+        console.error("Error fetching shipments:", error);
+        return [];
+    }
 }
 
 export async function getShipmentByCode(code: string): Promise<Shipment | null> {
-    const shipment = await prisma.shipment.findUnique({
-        where: { trackingCode: code },
-    });
-    if (!shipment) return null;
-    return {
-        ...shipment,
-        status: shipment.status as ShipmentStatus,
-        estimatedDelivery: shipment.estimatedDelivery.toISOString(),
-        createdAt: shipment.createdAt.toISOString(),
-        updatedAt: shipment.updatedAt.toISOString(),
-    };
+    try {
+        const shipment = await prisma.shipment.findUnique({
+            where: { trackingCode: code },
+        });
+        if (!shipment) return null;
+        return {
+            ...shipment,
+            status: shipment.status as ShipmentStatus,
+            estimatedDelivery: shipment.estimatedDelivery.toISOString(),
+            createdAt: shipment.createdAt.toISOString(),
+            updatedAt: shipment.updatedAt.toISOString(),
+        };
+    } catch (error) {
+        console.error(`Error fetching shipment ${code}:`, error);
+        return null;
+    }
 }
 
 export async function createShipment(
