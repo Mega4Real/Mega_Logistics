@@ -37,8 +37,11 @@ export async function POST(request: Request) {
             estimatedDelivery,
         });
         return NextResponse.json(shipment, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating shipment:', error);
-        return NextResponse.json({ error: 'Failed to create shipment' }, { status: 500 });
+        return NextResponse.json(
+            { error: error.message || 'Failed to create shipment' },
+            { status: 500 }
+        );
     }
 }

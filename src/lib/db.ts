@@ -57,28 +57,34 @@ export async function getShipmentByCode(code: string): Promise<Shipment | null> 
 
 export async function createShipment(
     data: Omit<Shipment, "id" | "createdAt" | "updatedAt">
-): Promise<Shipment> {
-    const shipment = await prisma.shipment.create({
-        data: {
-            trackingCode: data.trackingCode,
-            sender: data.sender,
-            recipient: data.recipient,
-            description: data.description,
-            weight: data.weight,
-            from: data.from,
-            to: data.to,
-            status: data.status,
-            location: data.location,
-            estimatedDelivery: new Date(data.estimatedDelivery),
-        },
-    });
-    return {
-        ...shipment,
-        status: shipment.status as ShipmentStatus,
-        estimatedDelivery: shipment.estimatedDelivery.toISOString(),
-        createdAt: shipment.createdAt.toISOString(),
-        updatedAt: shipment.updatedAt.toISOString(),
-    };
+): Promise<Shipment | null> {
+    try {
+        const shipment = await prisma.shipment.create({
+            data: {
+                trackingCode: data.trackingCode,
+                sender: data.sender,
+                recipient: data.recipient,
+                description: data.description,
+                weight: data.weight,
+                from: data.from,
+                to: data.to,
+                status: data.status,
+                location: data.location,
+                estimatedDelivery: new Date(data.estimatedDelivery),
+            },
+        });
+        return {
+            ...shipment,
+            status: shipment.status as ShipmentStatus,
+            estimatedDelivery: shipment.estimatedDelivery.toISOString(),
+            createdAt: shipment.createdAt.toISOString(),
+            updatedAt: shipment.updatedAt.toISOString(),
+        };
+    } catch (error) {
+        console.error("Error creating shipment:", error);
+        throw error; // Re-throw to let API route handle it or return null if preferred. 
+        // Returning null changes the signature to Promise<Shipment | null> which I updated above.
+    }
 }
 
 export async function updateShipment(

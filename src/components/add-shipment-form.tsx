@@ -53,7 +53,8 @@ export function AddShipmentForm() {
                 })
                 router.refresh()
             } else {
-                alert("Failed to create shipment")
+                const data = await res.json();
+                alert(data.error || "Failed to create shipment");
             }
         } catch (error) {
             console.error(error)
