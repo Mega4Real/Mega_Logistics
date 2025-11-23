@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getShipments, createShipment } from '@/lib/db';
 
+// API route for shipments
 export async function GET() {
     const shipments = await getShipments();
     return NextResponse.json(shipments);
