@@ -1,9 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+import { prisma } from "@/lib/prisma";
 
-const DB_PATH = path.join(process.cwd(), 'data.json');
-
-export type ShipmentStatus = "Picked Up" | "In Transit" | "Out For Delivery" | "On Hold" | "Delivered";
+export type ShipmentStatus = "Picked Up" | "In Transit" | "Out For Delivery" | "Delivered" | "On Hold";
 
 export interface Shipment {
     id: number;
@@ -11,93 +8,105 @@ export interface Shipment {
     sender: string;
     recipient: string;
     description: string;
-    weight: number; // Weight in kg
-    from: string; // Origin location
-    to: string; // Destination location
+    weight: number;
+    from: string;
+    to: string;
     status: ShipmentStatus;
     location: string;
-    estimatedDelivery: string; // Date stored as string
+    estimatedDelivery: string; // ISO string for frontend compatibility
     createdAt: string;
     updatedAt: string;
 }
 
-function readDb(): Shipment[] {
-    if (!fs.existsSync(DB_PATH)) {
-        return [];
-    }
-    const data = fs.readFileSync(DB_PATH, 'utf-8');
+export async function getShipments(): Promise<Shipment[]> {
+    const shipments = await prisma.shipment.findMany({
+        orderBy: { updatedAt: "desc" },
+    });
+    return shipments.map((s) => ({
+        ...s,
+        status: s.status as ShipmentStatus,
+        estimatedDelivery: s.estimatedDelivery.toISOString(),
+        createdAt: s.createdAt.toISOString(),
+        updatedAt: s.updatedAt.toISOString(),
+    }));
+}
+
+export async function getShipmentByCode(code: string): Promise<Shipment | null> {
+    const shipment = await prisma.shipment.findUnique({
+        where: { trackingCode: code },
+    });
+    if (!shipment) return null;
+    return {
+        ...shipment,
+        status: shipment.status as ShipmentStatus,
+        estimatedDelivery: shipment.estimatedDelivery.toISOString(),
+        createdAt: shipment.createdAt.toISOString(),
+        updatedAt: shipment.updatedAt.toISOString(),
+    };
+}
+
+export async function createShipment(
+    data: Omit<Shipment, "id" | "createdAt" | "updatedAt">
+): Promise<Shipment> {
+    const shipment = await prisma.shipment.create({
+        data: {
+            trackingCode: data.trackingCode,
+            sender: data.sender,
+            recipient: data.recipient,
+            description: data.description,
+            weight: data.weight,
+            from: data.from,
+            to: data.to,
+            status: data.status,
+            location: data.location,
+            estimatedDelivery: new Date(data.estimatedDelivery),
+        },
+    });
+    return {
+        ...shipment,
+        status: shipment.status as ShipmentStatus,
+        estimatedDelivery: shipment.estimatedDelivery.toISOString(),
+        createdAt: shipment.createdAt.toISOString(),
+        updatedAt: shipment.updatedAt.toISOString(),
+    };
+}
+
+export async function updateShipment(
+    code: string,
+    data: Partial<Omit<Shipment, "id" | "createdAt" | "updatedAt">>
+): Promise<Shipment | null> {
     try {
-        return JSON.parse(data);
+        const updateData: any = { ...data };
+        if (data.estimatedDelivery) {
+            updateData.estimatedDelivery = new Date(data.estimatedDelivery);
+        }
+
+        const shipment = await prisma.shipment.update({
+            where: { trackingCode: code },
+            data: updateData,
+        });
+
+        return {
+            ...shipment,
+            status: shipment.status as ShipmentStatus,
+            estimatedDelivery: shipment.estimatedDelivery.toISOString(),
+            createdAt: shipment.createdAt.toISOString(),
+            updatedAt: shipment.updatedAt.toISOString(),
+        };
     } catch (error) {
-        return [];
+        console.error("Error updating shipment:", error);
+        return null;
     }
 }
 
-function writeDb(data: Shipment[]) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+export async function deleteShipment(code: string): Promise<boolean> {
+    try {
+        await prisma.shipment.delete({
+            where: { trackingCode: code },
+        });
+        return true;
+    } catch (error) {
+        console.error("Error deleting shipment:", error);
+        return false;
+    }
 }
-
-export const db = {
-    shipment: {
-        findMany: async ({ orderBy }: { orderBy?: { createdAt: 'desc' } } = {}) => {
-            const shipments = readDb();
-            if (orderBy?.createdAt === 'desc') {
-                return shipments.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            }
-            return shipments;
-        },
-        findUnique: async ({ where }: { where: { trackingCode: string } }) => {
-            const shipments = readDb();
-            return shipments.find((s) => s.trackingCode === where.trackingCode) || null;
-        },
-        create: async ({ data }: { data: Omit<Shipment, 'id' | 'createdAt' | 'updatedAt'> & { estimatedDelivery: Date } }) => {
-            const shipments = readDb();
-            const newShipment: Shipment = {
-                ...data,
-                id: shipments.length + 1,
-                estimatedDelivery: data.estimatedDelivery.toISOString(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            };
-            shipments.push(newShipment);
-            writeDb(shipments);
-            return newShipment;
-        },
-        update: async ({ where, data }: { where: { trackingCode: string }, data: Partial<Omit<Shipment, 'id' | 'createdAt' | 'updatedAt'>> & { estimatedDelivery?: Date } }) => {
-            const shipments = readDb();
-            const index = shipments.findIndex((s) => s.trackingCode === where.trackingCode);
-            if (index === -1) {
-                console.error('Shipment not found:', where.trackingCode);
-                throw new Error('Shipment not found');
-            }
-
-            console.log('Updating shipment at index:', index);
-            console.log('Current shipment:', shipments[index]);
-            console.log('Update data:', data);
-
-            const updatedShipment: Shipment = {
-                ...shipments[index],
-                ...data,
-                estimatedDelivery: data.estimatedDelivery ? data.estimatedDelivery.toISOString() : shipments[index].estimatedDelivery,
-                updatedAt: new Date().toISOString(),
-            };
-
-            console.log('Updated shipment:', updatedShipment);
-
-            shipments[index] = updatedShipment;
-            writeDb(shipments);
-            return updatedShipment;
-        },
-        delete: async ({ where }: { where: { trackingCode: string } }) => {
-            const shipments = readDb();
-            const index = shipments.findIndex((s) => s.trackingCode === where.trackingCode);
-            if (index === -1) {
-                throw new Error('Shipment not found');
-            }
-            const deletedShipment = shipments[index];
-            shipments.splice(index, 1);
-            writeDb(shipments);
-            return deletedShipment;
-        },
-    },
-};
