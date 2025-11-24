@@ -22,7 +22,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const prisma = globalForPrisma.prisma ?? new PrismaClient({
-    adapter: new PrismaNeon(new Pool({ connectionString })),
+    adapter: new PrismaNeon(new Pool({ connectionString }) as any),
 });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
