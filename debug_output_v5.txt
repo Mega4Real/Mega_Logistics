@@ -1,0 +1,15 @@
+🔍 Testing database connection...
+DATABASE_URL: Defined
+First char: p
+Last char: e
+Has quotes? false
+Attempting to connect...
+❌ Connection failed:
+PrismaClientInitializationError: Can't reach database server at `ep-red-queen-a49b7o3h-pooler.us-east-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-red-queen-a49b7o3h-pooler.us-east-1.aws.neon.tech:5432`.
+    at t (C:\Users\marti\Desktop\Mega Logistics\node_modules\@prisma\client\runtime\library.js:112:2488)
+    at async main (C:\Users\marti\Desktop\Mega Logistics\debug-db.ts:16:9) {
+  clientVersion: '5.22.0',
+  errorCode: 'P1001'
+}
