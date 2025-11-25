@@ -27,7 +27,7 @@ export function ShipmentStatusTracker({ currentStatus }: ShipmentStatusTrackerPr
         <div className="w-full py-8">
             <div className="relative">
                 {/* Progress Line */}
-                <div className="absolute left-0 top-6 h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full">
+                <div className="absolute left-0 top-6 h-2 w-full bg-slate-200 rounded-full">
                     <div
                         className={`h-full ${progressColor} transition-all duration-500 rounded-full`}
                         style={{ width: `${progressPercentage}%` }}
@@ -47,7 +47,7 @@ export function ShipmentStatusTracker({ currentStatus }: ShipmentStatusTrackerPr
                                 <div
                                     className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-4 transition-all duration-300 ${isCompleted
                                         ? "border-green-500 bg-green-500 text-white"
-                                        : "border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-800"
+                                        : "border-slate-200 bg-white text-slate-400"
                                         } ${isCurrent ? "scale-110 shadow-lg" : ""}`}
                                 >
                                     <Icon className="h-5 w-5" />
@@ -56,7 +56,7 @@ export function ShipmentStatusTracker({ currentStatus }: ShipmentStatusTrackerPr
                                 {/* Label */}
                                 <div className="mt-3 text-center">
                                     <p
-                                        className={`text-sm font-medium ${isCompleted ? "text-slate-900 dark:text-slate-100" : "text-slate-500 dark:text-slate-400"
+                                        className={`text-sm font-medium ${isCompleted ? "text-slate-900" : "text-slate-500"
                                             } ${isCurrent ? "font-bold" : ""}`}
                                     >
                                         {status.label}
