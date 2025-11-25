@@ -30,8 +30,8 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 dark:bg-slate-900">
-            <Card className="w-full max-w-sm">
+        <div className="flex min-h-screen items-center justify-center bg-white p-4 text-black">
+            <Card className="w-full max-w-sm bg-white text-black">
                 <CardHeader>
                     <CardTitle>Admin Login</CardTitle>
                     <CardDescription>Enter your password to access the dashboard.</CardDescription>

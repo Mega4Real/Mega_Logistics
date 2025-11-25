@@ -17,7 +17,7 @@ export default async function DashboardPage() {
     const shipments = await getShipments()
 
     return (
-        <div className="container mx-auto p-4 space-y-8">
+        <div className="container mx-auto p-4 space-y-8 min-h-screen bg-white text-black">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold">Admin Dashboard</h1>
                 <Link
