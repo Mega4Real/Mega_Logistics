@@ -1,4 +1,0 @@
-Testing Pool direct connection...
-URL length: 118
-✅ Pool connected!
-Time: { now: 2025-11-24T14:13:30.391Z }

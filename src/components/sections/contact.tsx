@@ -53,7 +53,7 @@ export function ContactSection() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Get in Touch</CardTitle>
-                            <CardDescription>Fill out the form and we'll get back to you shortly.</CardDescription>
+                            <CardDescription>Fill out the form and we&apos;ll get back to you shortly.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form className="space-y-4" onSubmit={handleSubmit}>

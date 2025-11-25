@@ -4,7 +4,6 @@ export async function POST(request: Request) {
     try {
         const { firstName, lastName, email, message } = await request.json();
         // Email handling – log the submission and pretend to send an email to martinwood904@aol.com
-        const recipient = "martinwood904@aol.com";
         console.log("Contact form submission:");
         console.log(`From: ${firstName} ${lastName} <${email}>`);
         console.log(`Message: ${message}`);

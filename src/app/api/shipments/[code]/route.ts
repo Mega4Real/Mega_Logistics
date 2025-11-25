@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getShipmentByCode, updateShipment, deleteShipment } from '@/lib/db';
+import { getShipmentByCode, updateShipment, deleteShipment, ShipmentStatus } from '@/lib/db';
 
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;
@@ -35,7 +35,18 @@ export async function PUT(
     }
 
     try {
-        const updateData: any = {};
+        type ShipmentUpdateInput = {
+            sender?: string;
+            recipient?: string;
+            description?: string;
+            weight?: number;
+            from?: string;
+            to?: string;
+            status?: ShipmentStatus;
+            location?: string;
+            estimatedDelivery?: string;
+        };
+        const updateData: ShipmentUpdateInput = {};
         if (sender !== undefined) updateData.sender = sender;
         if (recipient !== undefined) updateData.recipient = recipient;
         if (description !== undefined) updateData.description = description;

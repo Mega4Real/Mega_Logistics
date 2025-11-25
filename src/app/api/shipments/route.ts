@@ -37,10 +37,11 @@ export async function POST(request: Request) {
             estimatedDelivery,
         });
         return NextResponse.json(shipment, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error creating shipment:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create shipment';
         return NextResponse.json(
-            { error: error.message || 'Failed to create shipment' },
+            { error: errorMessage },
             { status: 500 }
         );
     }

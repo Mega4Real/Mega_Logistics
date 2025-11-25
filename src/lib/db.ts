@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { Shipment as PrismaShipment } from "@prisma/client";
 
 export type ShipmentStatus = "Picked Up" | "In Transit" | "Out For Delivery" | "Delivered" | "On Hold";
 
@@ -23,7 +24,7 @@ export async function getShipments(): Promise<Shipment[]> {
         const shipments = await prisma.shipment.findMany({
             orderBy: { updatedAt: "desc" },
         });
-        return shipments.map((s: any) => ({
+        return shipments.map((s: PrismaShipment) => ({
             ...s,
             status: s.status as ShipmentStatus,
             estimatedDelivery: s.estimatedDelivery.toISOString(),
@@ -92,7 +93,11 @@ export async function updateShipment(
     data: Partial<Omit<Shipment, "id" | "createdAt" | "updatedAt">>
 ): Promise<Shipment | null> {
     try {
-        const updateData: any = { ...data };
+        type ShipmentUpdateData = {
+            [K in keyof Omit<PrismaShipment, "id" | "createdAt" | "updatedAt">]?: K extends "estimatedDelivery" ? (Date | string) : PrismaShipment[K]
+        };
+
+        const updateData: ShipmentUpdateData = { ...data };
         if (data.estimatedDelivery) {
             updateData.estimatedDelivery = new Date(data.estimatedDelivery);
         }

@@ -16,11 +16,10 @@ if (!connectionString) {
 }
 
 declare global {
-    // eslint-disable-next-line no-var
     var prisma: PrismaClient | undefined;
 }
 
-const pool = new Pool({ connectionString }) as any;
+const pool = new Pool({ connectionString });
 const prisma = global.prisma ?? new PrismaClient({ adapter: new PrismaNeon(pool) });
 
 if (process.env.NODE_ENV !== 'production') {
