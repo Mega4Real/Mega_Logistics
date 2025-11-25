@@ -12,8 +12,8 @@ export default async function TrackingPage({ params }: { params: Promise<{ code:
 
     if (!shipment) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center p-4">
-                <Card className="w-full max-w-md">
+            <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-white text-black">
+                <Card className="w-full max-w-md bg-white text-black">
                     <CardHeader>
                         <CardTitle className="text-destructive">Shipment Not Found</CardTitle>
                         <CardDescription>We could not find a shipment with code {code}.</CardDescription>
@@ -29,8 +29,8 @@ export default async function TrackingPage({ params }: { params: Promise<{ code:
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 dark:bg-slate-900">
-            <Card className="w-full max-w-3xl">
+        <div className="flex min-h-screen flex-col items-center justify-center bg-white p-4 text-black">
+            <Card className="w-full max-w-3xl bg-white text-black">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle>Shipment Details</CardTitle>

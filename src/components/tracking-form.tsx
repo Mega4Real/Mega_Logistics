@@ -27,6 +27,7 @@ export function TrackingForm() {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     required
+                    className="text-black bg-white"
                 />
             </div>
             <div className="flex justify-end">
