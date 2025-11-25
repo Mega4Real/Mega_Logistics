@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export function HeroSection() {
     return (
-        <section className="relative flex min-h-[80vh] items-center justify-center bg-slate-900 py-20 text-slate-50">
+        <section className="relative flex min-h-[80vh] items-center justify-center bg-white py-20 text-black">
             {/* Background Image Overlay */}
             <div
                 className="absolute inset-0 z-0 opacity-20"
@@ -20,16 +20,16 @@ export function HeroSection() {
                         Global Logistics <br />
                         <span className="text-primary">Redefined</span>
                     </h1>
-                    <p className="max-w-[600px] text-slate-300 md:text-xl">
+                    <p className="max-w-[600px] text-slate-700 md:text-xl">
                         Seamless shipping solutions for businesses of all sizes. Track your package in real-time and experience the future of logistics.
                     </p>
                 </div>
 
                 <div className="flex items-center justify-center">
-                    <Card className="w-full max-w-md bg-slate-50/10 text-slate-50 backdrop-blur-md border-slate-50/20">
+                    <Card className="w-full max-w-md bg-slate-100 text-slate-900 backdrop-blur-md border-slate-200">
                         <CardHeader>
                             <CardTitle className="text-2xl">Track Your Shipment</CardTitle>
-                            <CardDescription className="text-slate-300">Enter your tracking ID to get started.</CardDescription>
+                            <CardDescription className="text-slate-700">Enter your tracking ID to get started.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="text-slate-900">
